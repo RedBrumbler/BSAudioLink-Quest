@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  module_id: bsq-audiolink
+  module_id: bs-audiolink
   qmodName: AudioLink
 
 jobs:
