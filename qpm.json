@@ -2,12 +2,12 @@
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
-    "name": "BSQAudioLink",
-    "id": "bsq-audiolink",
+    "name": "AudioLink",
+    "id": "bs-audiolink",
     "version": "0.0.1",
     "url": null,
     "additionalData": {
-      "overrideSoName": "libbsq-audiolink.so"
+      "overrideSoName": "libbs-audiolink.so"
     }
   },
   "dependencies": [
