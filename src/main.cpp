@@ -11,6 +11,7 @@
 #include "GlobalNamespace/StandardGameplayInstaller.hpp"
 #include "GlobalNamespace/MissionGameplayInstaller.hpp"
 #include "GlobalNamespace/MultiplayerLocalActivePlayerInstaller.hpp"
+#include "GlobalNamespace/MenuTransitionsHelper.hpp"
 
 ModInfo modInfo{MOD_ID, VERSION};
 
@@ -40,6 +41,11 @@ MAKE_HOOK_MATCH(MultiplayerLocalActivePlayerInstaller_InstallBindings, &GlobalNa
     Install(self);
 }
 
+MAKE_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &GlobalNamespace::MenuTransitionsHelper::RestartGame, void, GlobalNamespace::MenuTransitionsHelper* self, System::Action_1<Zenject::DiContainer*>* finishCallback) {
+    AudioLink::AssetBundleManager::get_instance()->RestartGame();
+    MenuTransitionsHelper_RestartGame(self, finishCallback);
+}
+
 extern "C" void setup(ModInfo& info) {
     info = modInfo;
 }
@@ -51,6 +57,7 @@ extern "C" void load() {
     INSTALL_HOOK(logger, StandardGameplayInstaller_InstallBindings);
     INSTALL_HOOK(logger, MissionGameplayInstaller_InstallBindings);
     INSTALL_HOOK(logger, MultiplayerLocalActivePlayerInstaller_InstallBindings);
+    INSTALL_HOOK(logger, MenuTransitionsHelper_RestartGame);
     
     PinkCore::RequirementAPI::RegisterInstalled("AudioLink");
 }
