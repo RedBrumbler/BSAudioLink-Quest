@@ -2,6 +2,7 @@
 
 #include "custom-types/shared/macros.hpp"
 #include "Zenject/ITickable.hpp"
+#include "Zenject/DiContainer.hpp"
 #include "UnityEngine/AudioSource.hpp"
 #include "UnityEngine/Material.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
@@ -79,7 +80,7 @@ DECLARE_CLASS_CODEGEN_INTERFACES(AudioLink, AudioLink, Il2CppObject, classof(Zen
     DECLARE_INSTANCE_METHOD(void, SendAudioOutputData);
 
     public:
-        DECLARE_CTOR(ctor, GlobalNamespace::AudioTimeSyncController* audioTimeSyncController, GlobalNamespace::ColorScheme* colorScheme);
+        DECLARE_CTOR(ctor, Zenject::DiContainer* container);
 )
 
 #undef DECLARE_INSTANCE_FIELD_PRIVATE

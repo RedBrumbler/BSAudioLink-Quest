@@ -21,32 +21,44 @@ void GetOutputDataHelper(UnityEngine::AudioSource* instance, ArrayW<float>& out,
     getOutputDataHelper(instance, out, channel);
 }
 
+extern Logger& getLogger();
+
 namespace AudioLink {
 
-    void AudioLink::ctor(GlobalNamespace::AudioTimeSyncController* audioTimeSyncController, GlobalNamespace::ColorScheme* colorScheme) {
+    void AudioLink::ctor(Zenject::DiContainer* container) {
+        getLogger().info("AudioLink ctor");
+        
+        auto audioTimeSyncController = container->TryResolve<GlobalNamespace::AudioTimeSyncController*>();
+        auto colorScheme = container->TryResolve<GlobalNamespace::ColorScheme*>();
+        getLogger().info("audioTimeSyncController: %p", audioTimeSyncController);
+        getLogger().info("colorScheme: %p", colorScheme);
+        
         _audioFramesL = ArrayW<float>(1023 * 4);
         _audioFramesR = ArrayW<float>(1023 * 4);
         _samples = ArrayW<float>(1023);
 
-        _audioSource = audioTimeSyncController->audioSource;
+        _audioSource = audioTimeSyncController ? audioTimeSyncController->audioSource : nullptr;
 
-        _customThemeColor0 = colorScheme->get_environmentColor0();
-        _customThemeColor1 = colorScheme->get_environmentColor1();
-        _customThemeColor2 = colorScheme->get_environmentColor0Boost();
-        _customThemeColor3 = colorScheme->get_environmentColor1Boost();
+        _customThemeColor0 = colorScheme ? colorScheme->get_environmentColor0() : Sombrero::FastColor::red();
+        _customThemeColor1 = colorScheme ? colorScheme->get_environmentColor1() : Sombrero::FastColor::cyan();
+        _customThemeColor2 = colorScheme ? colorScheme->get_environmentColor0Boost() : Sombrero::FastColor::pink();
+        _customThemeColor3 = colorScheme ? colorScheme->get_environmentColor1Boost() : Sombrero::FastColor::lightblue();
 
         AssetBundleManager::get_instance()->StartLoad(std::bind(&AudioLink::Initialize, this));
     }
 
     void AudioLink::Initialize() {
+        getLogger().info("AudioLink Initialize");
         auto manager = AssetBundleManager::get_instance();
         _audioMaterial = manager->get_material();
         auto audioRenderTexture = manager->get_renderTexture();
 
         UpdateSettings();
         UpdateThemeColors();
-        Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
 
+
+        getLogger().info("SetGlobalRenderTexture");
+        Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
         _initialized = true;
     }
 
@@ -112,6 +124,7 @@ namespace AudioLink {
     }
 
     void AudioLink::UpdateSettings() {
+        getLogger().info("Updating Settings");
         if (!_audioMaterial || !_audioMaterial->m_CachedPtr.m_value) return;
         _audioMaterial->SetFloat(ShaderProperties::_x0, ConfigProperties::X0);
         _audioMaterial->SetFloat(ShaderProperties::_x1, ConfigProperties::X1);
@@ -129,6 +142,7 @@ namespace AudioLink {
     }
 
     void AudioLink::UpdateThemeColors() {
+        getLogger().info("Updating Color Scheme");
         if (!_audioMaterial || !_audioMaterial->m_CachedPtr.m_value) return;
         _audioMaterial->SetInt(ShaderProperties::_themeColorMode, ConfigProperties::THEME_COLOR_MODE);
         _audioMaterial->SetColor(ShaderProperties::_customThemeColor0ID, _customThemeColor0);
