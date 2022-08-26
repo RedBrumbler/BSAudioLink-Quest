@@ -15,40 +15,53 @@ DEFINE_TYPE(AudioLink, AudioLink);
 using namespace UnityEngine;
 
 void GetOutputDataHelper(UnityEngine::AudioSource* instance, ArrayW<float>& out, int channel) {
-    // TODO: test
     using GetOutputDataHelperMethod = function_ptr_t<void, UnityEngine::AudioSource*, ArrayW<float>, int>;
     static auto getOutputDataHelper = reinterpret_cast<GetOutputDataHelperMethod>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::GetOutputDataHelper"));
     getOutputDataHelper(instance, out, channel);
 }
 
-float GetSpatialBlendMix(UnityEngine::AudioSource* self) {
+inline float GetSpatialBlendMix(UnityEngine::AudioSource* self) {
     // this is what the icall in unity does, so this is what we will do
-    return *(float*)(*(long *)(self + 0x90) + 4);
+    if (!self) return 0.0f;
+    auto obj = *(long *)(self + 0x90);
+    if (!obj) return 0.0f;
+    return *(float*)(obj + 4);
 }
 
 extern Logger& getLogger();
 
 namespace AudioLink {
 
-    void AudioLink::ctor(Zenject::DiContainer* container) {
+    void AudioLink::ctor() {
         getLogger().info("AudioLink ctor");
         
-        auto audioTimeSyncController = container->TryResolve<GlobalNamespace::AudioTimeSyncController*>();
-        auto colorScheme = container->TryResolve<GlobalNamespace::ColorScheme*>();
-        getLogger().info("audioTimeSyncController: %p", audioTimeSyncController);
-        getLogger().info("colorScheme: %p", colorScheme);
         _audioFramesL = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
         _audioFramesR = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
         _samples = ArrayW<float>(il2cpp_array_size_t(1023));
 
-        _audioSource = audioTimeSyncController ? audioTimeSyncController->audioSource : nullptr;
+        _audioSource = nullptr;
 
-        _customThemeColor0 = colorScheme ? colorScheme->get_environmentColor0() : Sombrero::FastColor::red();
-        _customThemeColor1 = colorScheme ? colorScheme->get_environmentColor1() : Sombrero::FastColor::cyan();
-        _customThemeColor2 = colorScheme ? colorScheme->get_environmentColor0Boost() : Sombrero::FastColor::pink();
-        _customThemeColor3 = colorScheme ? colorScheme->get_environmentColor1Boost() : Sombrero::FastColor::lightblue();
+        _customThemeColor0 = Sombrero::FastColor::red();
+        _customThemeColor1 = Sombrero::FastColor::cyan();
+        _customThemeColor2 = Sombrero::FastColor::pink();
+        _customThemeColor3 = Sombrero::FastColor::lightblue();
 
-        AssetBundleManager::get_instance()->StartLoad(std::bind(&AudioLink::Initialize, this));
+        AssetBundleManager::get_instance()->Load();
+        Initialize();
+    }
+
+    void AudioLink::SetAudioSource(UnityEngine::AudioSource* audioSource) {
+        _audioSource = audioSource;
+    }
+
+    void AudioLink::SetColorScheme(GlobalNamespace::ColorScheme* colorScheme) {
+        if (!colorScheme) return;
+        _customThemeColor0 = colorScheme->get_environmentColor0();
+        _customThemeColor1 = colorScheme->get_environmentColor1();
+        _customThemeColor2 = colorScheme->get_environmentColor0Boost();
+        _customThemeColor3 = colorScheme->get_environmentColor1Boost();
+
+        UpdateThemeColors();
     }
 
     void AudioLink::Initialize() {
@@ -56,9 +69,6 @@ namespace AudioLink {
         auto manager = AssetBundleManager::get_instance();
         _audioMaterial = manager->get_material();
         auto audioRenderTexture = manager->get_renderTexture();
-
-        UpdateSettings();
-        UpdateThemeColors();
 
         getLogger().info("SetGlobalRenderTexture");
         Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);

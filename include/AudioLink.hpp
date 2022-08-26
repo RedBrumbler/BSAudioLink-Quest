@@ -3,39 +3,14 @@
 #include "custom-types/shared/macros.hpp"
 #include "Zenject/ITickable.hpp"
 #include "Zenject/DiContainer.hpp"
-#include "UnityEngine/AudioSource.hpp"
+
 #include "UnityEngine/Material.hpp"
-#include "GlobalNamespace/AudioTimeSyncController.hpp"
+#include "UnityEngine/AudioSource.hpp"
+
 #include "GlobalNamespace/ColorScheme.hpp"
 
 #include "sombrero/shared/FastColor.hpp"
-
-
-#define DECLARE_INSTANCE_FIELD_PRIVATE(type_, name_) \
-private: \
-struct ___FieldRegistrator_##name_ : ::custom_types::FieldRegistrator { \
-    ___FieldRegistrator_##name_() { \
-        ___TargetType::___TypeRegistration::addField(this); \
-    } \
-    constexpr const char* name() const override { \
-        return #name_; \
-    } \
-    const Il2CppType* type() const override { \
-        ::il2cpp_functions::Init(); \
-        return ::il2cpp_functions::class_get_type(::il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_class<type_>::get()); \
-    } \
-    constexpr uint16_t fieldAttributes() const override { \
-        return FIELD_ATTRIBUTE_PRIVATE; \
-    } \
-    constexpr size_t size() const override { \
-        return sizeof(type_); \
-    } \
-    int32_t offset() const override { \
-        return offsetof(___TargetType, name_); \
-    } \
-}; \
-static inline ___FieldRegistrator_##name_ ___##name_##_FieldRegistrator; \
-type_ name_
+#include "private_field.hpp"
 
 // based on https://github.com/Aeroluna/BSAudioLink/blob/master/AudioLink/Scripts/AudioLink.cs
 DECLARE_CLASS_CODEGEN_INTERFACES(AudioLink, AudioLink, Il2CppObject, classof(Zenject::ITickable*),
@@ -78,9 +53,9 @@ DECLARE_CLASS_CODEGEN_INTERFACES(AudioLink, AudioLink, Il2CppObject, classof(Zen
     DECLARE_INSTANCE_METHOD(void, UpdateThemeColors);
     DECLARE_INSTANCE_METHOD(void, FPSUpdate);
     DECLARE_INSTANCE_METHOD(void, SendAudioOutputData);
+    DECLARE_INSTANCE_METHOD(void, SetAudioSource, UnityEngine::AudioSource* audioSource);
+    DECLARE_INSTANCE_METHOD(void, SetColorScheme, GlobalNamespace::ColorScheme* colorScheme);
 
     public:
-        DECLARE_CTOR(ctor, Zenject::DiContainer* container);
+        DECLARE_CTOR(ctor);
 )
-
-#undef DECLARE_INSTANCE_FIELD_PRIVATE
