@@ -43,14 +43,17 @@ namespace AudioLink {
         if (_bundle && _bundle->m_CachedPtr.m_value) {
             _bundle->Unload(true);
         }
+        _bundle = nullptr;
 
         if (_material && _material->m_CachedPtr.m_value) {
             UnityEngine::Object::DestroyImmediate(_material);
         }
+        _material = nullptr;
 
         if (_renderTexture && _renderTexture->m_CachedPtr.m_value) {
             UnityEngine::Object::DestroyImmediate(_renderTexture);
         }
+        _renderTexture = nullptr;
     }
     
     custom_types::Helpers::Coroutine AssetBundleManager::LoadAsync(std::function<void()> onFinished) {
@@ -68,22 +71,9 @@ namespace AudioLink {
         if (!_bundle && !_bundle->m_CachedPtr.m_value) {
             co_return;
         }
-        
-        auto matReq = _bundle->LoadAssetAsync<UnityEngine::Material*>("assets/audiolink/materials/mat_audiolink.mat");
-        matReq->set_allowSceneActivation(true);
-        co_yield reinterpret_cast<System::Collections::IEnumerator*>(matReq);
-        getLogger().info("AssetBundleManager Material Loaded");
-        // FIXME: check if need for instantiation
-        _material = reinterpret_cast<UnityEngine::Material*>(matReq->get_asset());
-        UnityEngine::Object::DontDestroyOnLoad(_material);
 
-        auto texReq = _bundle->LoadAssetAsync<UnityEngine::RenderTexture*>("assets/audiolink/rendertextures/rt_audiolink.asset");
-        texReq->set_allowSceneActivation(true);
-        co_yield reinterpret_cast<System::Collections::IEnumerator*>(texReq);
-        getLogger().info("AssetBundleManager RenderTexture Loaded");
-        // FIXME: check if need for instantiation
-        _renderTexture = reinterpret_cast<UnityEngine::RenderTexture*>(texReq->get_asset());
-        UnityEngine::Object::DontDestroyOnLoad(_renderTexture);
+        _material = _bundle->LoadAsset<UnityEngine::Material*>("assets/audiolink/materials/mat_audiolink.mat");
+        _renderTexture = _bundle->LoadAsset<UnityEngine::RenderTexture*>("assets/audiolink/rendertextures/rt_audiolink.asset");
 
         getLogger().info("Loaded material: %p", _material);
         getLogger().info("Loaded texture: %p", _renderTexture);

@@ -15,10 +15,15 @@ DEFINE_TYPE(AudioLink, AudioLink);
 using namespace UnityEngine;
 
 void GetOutputDataHelper(UnityEngine::AudioSource* instance, ArrayW<float>& out, int channel) {
-            // TODO: test
+    // TODO: test
     using GetOutputDataHelperMethod = function_ptr_t<void, UnityEngine::AudioSource*, ArrayW<float>, int>;
     static auto getOutputDataHelper = reinterpret_cast<GetOutputDataHelperMethod>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::GetOutputDataHelper"));
     getOutputDataHelper(instance, out, channel);
+}
+
+float GetSpatialBlendMix(UnityEngine::AudioSource* self) {
+    // this is what the icall in unity does, so this is what we will do
+    return *(float*)(*(long *)(self + 0x90) + 4);
 }
 
 extern Logger& getLogger();
@@ -32,10 +37,9 @@ namespace AudioLink {
         auto colorScheme = container->TryResolve<GlobalNamespace::ColorScheme*>();
         getLogger().info("audioTimeSyncController: %p", audioTimeSyncController);
         getLogger().info("colorScheme: %p", colorScheme);
-        
-        _audioFramesL = ArrayW<float>(1023 * 4);
-        _audioFramesR = ArrayW<float>(1023 * 4);
-        _samples = ArrayW<float>(1023);
+        _audioFramesL = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
+        _audioFramesR = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
+        _samples = ArrayW<float>(il2cpp_array_size_t(1023));
 
         _audioSource = audioTimeSyncController ? audioTimeSyncController->audioSource : nullptr;
 
@@ -55,7 +59,6 @@ namespace AudioLink {
 
         UpdateSettings();
         UpdateThemeColors();
-
 
         getLogger().info("SetGlobalRenderTexture");
         Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
@@ -84,42 +87,42 @@ namespace AudioLink {
         if (_elapsedTime >= _fPSTime) {
             FPSUpdate();
         }
-        time_t rawtime = time(nullptr);
-        auto timeInfo = localtime(&rawtime);
-        unsigned long long timeOfDay = timeInfo->tm_hour * 60 * 60 + // hours since midnight * 60 * 60 for seconds since midnight
-                              timeInfo->tm_min * 60 + // minutes after hour * 60 for seconds since hour
-                              timeInfo->tm_sec; // seconds after minute
-        // = current time in seconds in day
-        
-        _audioMaterial->SetVector(ShaderProperties::_advancedTimeProps, Vector4(
-            _elapsedTime,
-            _elapsedTimeMSW,
-            timeOfDay,
-            ConfigProperties::READBACK_TIME
-        ));
 
-        // Jan 1, 1970 = 62135596800 0000000.0 ticks.
-        //double utcSecondsUnix = (DateTime.UtcNow.Ticks / 10 000 000.0) - 62135596800.0;
-        // this works out to just being seconds since unix epoch
-        double utcSecondsUnix = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        if (_audioMaterial && _audioMaterial->m_CachedPtr) {
+            time_t rawtime = time(nullptr);
+            auto timeInfo = localtime(&rawtime);
+            unsigned long long timeOfDay = timeInfo->tm_hour * 60 * 60 + // hours since midnight * 60 * 60 for seconds since midnight
+                                  timeInfo->tm_min * 60 + // minutes after hour * 60 for seconds since hour
+                                  timeInfo->tm_sec; // seconds after minute
+            // = current time in seconds in day
 
-        _audioMaterial->SetVector(ShaderProperties::_advancedTimeProps2, Vector4(
-            _networkTimeMS & 65535,
-            _networkTimeMS >> 16,
-            std::floor(utcSecondsUnix / 86400),
-            std::fmod(utcSecondsUnix, 86400)
-        ));
+            _audioMaterial->SetVector(ShaderProperties::_advancedTimeProps, Vector4(
+                _elapsedTime,
+                _elapsedTimeMSW,
+                timeOfDay,
+                ConfigProperties::READBACK_TIME
+            ));
 
-        if (_audioSource && _audioSource->m_CachedPtr.m_value)
-        {
-            SendAudioOutputData();
+            // Jan 1, 1970 = 62135596800 0000000.0 ticks.
+            //double utcSecondsUnix = (DateTime.UtcNow.Ticks / 10 000 000.0) - 62135596800.0;
+            // this works out to just being seconds since unix epoch
+            double utcSecondsUnix = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-            // Used to correct for the volume of the audio source component
-            _audioMaterial->SetFloat(ShaderProperties::_sourceVolume, _audioSource->get_volume());
-            // TODO: test
-            using GetSpatialBlend = function_ptr_t<float, UnityEngine::AudioSource*>;
-            static auto get_spatialBlend = reinterpret_cast<GetSpatialBlend>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::GetSpatialBlendMix"));
-            _audioMaterial->SetFloat(ShaderProperties::_sourceSpatialBlend, get_spatialBlend(_audioSource));
+            _audioMaterial->SetVector(ShaderProperties::_advancedTimeProps2, Vector4(
+                _networkTimeMS & 65535,
+                _networkTimeMS >> 16,
+                std::floor(utcSecondsUnix / 86400),
+                std::fmod(utcSecondsUnix, 86400)
+            ));
+
+            if (_audioSource && _audioSource->m_CachedPtr.m_value)
+            {
+                SendAudioOutputData();
+
+                // Used to correct for the volume of the audio source component
+                _audioMaterial->SetFloat(ShaderProperties::_sourceVolume, _audioSource->get_volume());
+                _audioMaterial->SetFloat(ShaderProperties::_sourceSpatialBlend, GetSpatialBlendMix(_audioSource));
+            }
         }
     }
 
@@ -152,8 +155,14 @@ namespace AudioLink {
     }
 
     void AudioLink::FPSUpdate() {
-        _audioMaterial->SetVector(ShaderProperties::_versionNumberAndFPSProperty, Vector4(ConfigProperties::AUDIOLINK_VERSION_NUMBER, 0, _fPSCount, 1));
-        _audioMaterial->SetVector(ShaderProperties::_playerCountAndData, {0, 0, 0, 0});
+        if (_audioMaterial && _audioMaterial->m_CachedPtr.m_value) {
+            _audioMaterial->SetVector(ShaderProperties::_versionNumberAndFPSProperty, Vector4(ConfigProperties::AUDIOLINK_VERSION_NUMBER, 0, _fPSCount, 1));
+            _audioMaterial->SetVector(ShaderProperties::_playerCountAndData, {0, 0, 0, 0});
+        } else {
+            getLogger().error("_audioMaterial %p was not valid!\n", _audioMaterial);
+            getLogger().error("Some properties have not been set...");
+        }
+
         _fPSCount = 0;
         _fPSTime++;
 
@@ -195,57 +204,39 @@ namespace AudioLink {
                 memcpy(_audioFramesR.begin(), _audioFramesL.begin(), sizeof(float) * 4092);
                 //System::Array::Copy((System::Array*)_audioFramesL.convert(), 0, (System::Array*)_audioFramesR.convert(), 0, 4092);
             }
-            else
+            else {
                 GetOutputDataHelper(_audioSource, _audioFramesR, 1); // right channel
+            }
 
             _rightChannelTestCounter--;
         }
         else
         {
             _rightChannelTestCounter = ConfigProperties::RIGHT_CHANNEL_TEST_DELAY;      // reset test countdown
-            _audioFramesR[0] = 0.0f;                                  // reset tested array element to zero just in case
-            GetOutputDataHelper(_audioSource, _audioFramesR, 1); // right channel test
+            _audioFramesR[0] = 0.0f;                                                    // reset tested array element to zero just in case
+            GetOutputDataHelper(_audioSource, _audioFramesR, 1);                        // right channel test
             _ignoreRightChannel = _audioFramesR[0] == 0.0f;
         }
 
-        // TODO: check if the Copy is allowed, else rewrite to memcpy
-        memcpy(_samples.begin(), _audioFramesL.begin(), sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples0L, _samples);
-        memcpy(_samples.begin(), _audioFramesL.begin() + 1023, sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples1L, _samples);
-        memcpy(_samples.begin(), _audioFramesL.begin() + 2046, sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples2L, _samples);
-        memcpy(_samples.begin(), _audioFramesL.begin() + 3069, sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples3L, _samples);
+        if (_audioMaterial && _audioMaterial->m_CachedPtr.m_value) {
+            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 0), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples0L, _samples);
+            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 1), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples1L, _samples);
+            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 2), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples2L, _samples);
+            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 3), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples3L, _samples);
 
-        memcpy(_samples.begin(), _audioFramesR.begin(), sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples0R, _samples);
-        memcpy(_samples.begin(), _audioFramesR.begin() + 1023, sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples1R, _samples);
-        memcpy(_samples.begin(), _audioFramesR.begin() + 2046, sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples2R, _samples);
-        memcpy(_samples.begin(), _audioFramesR.begin() + 3069, sizeof(float) * 1023);
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples3R, _samples);
-
-        /*
-        System::Array::Copy((System::Array*)_audioFramesL.convert(), 0, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 4
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples0L, _samples);
-        System::Array::Copy((System::Array*)_audioFramesL.convert(), 1023, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 3
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples1L, _samples);
-        System::Array::Copy((System::Array*)_audioFramesL.convert(), 2046, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 2
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples2L, _samples);
-        System::Array::Copy((System::Array*)_audioFramesL.convert(), 3069, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 1
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples3L, _samples);
-
-        System::Array::Copy((System::Array*)_audioFramesR.convert(), 0, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 4
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples0R, _samples);
-        System::Array::Copy((System::Array*)_audioFramesR.convert(), 1023, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 3
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples1R, _samples);
-        System::Array::Copy((System::Array*)_audioFramesR.convert(), 2046, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 2
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples2R, _samples);
-        System::Array::Copy((System::Array*)_audioFramesR.convert(), 3069, (System::Array*)_samples.convert(), 0, 1023); // 4092 - 1023 * 1
-        _audioMaterial->SetFloatArray(ShaderProperties::_samples3R, _samples);
-        */
+            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 0), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples0R, _samples);
+            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 1), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples1R, _samples);
+            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 2), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples2R, _samples);
+            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 3), sizeof(float) * 1023);
+            _audioMaterial->SetFloatArray(ShaderProperties::_samples3R, _samples);
+        }
     }
 
     /* these methods exist to make the things they return "readonly" */
