@@ -6,7 +6,6 @@
 #include "ShaderProperties.hpp"
 
 #include "UnityEngine/Time.hpp"
-#include "UnityEngine/Graphics.hpp"
 #include "UnityEngine/Vector4.hpp"
 #include "UnityEngine/PrimitiveType.hpp"
 #include "UnityEngine/Renderer.hpp"
@@ -15,7 +14,8 @@
 #include "UnityEngine/Rendering/RenderTextureSubElement.hpp"
 #include <chrono>
 
-#include "System/Array.hpp"
+#include "sombrero/shared/FastVector3.hpp"
+
 DEFINE_TYPE(AudioLink, AudioLink);
 
 using namespace UnityEngine;
@@ -86,7 +86,7 @@ namespace AudioLink {
         _initialized = true;
 
         _testPlane = UnityEngine::GameObject::CreatePrimitive(UnityEngine::PrimitiveType::Quad);
-        _testPlane->get_transform()->set_localScale(Vector3{2, 1, 1} * config.showTestPlane);
+        _testPlane->get_transform()->set_localScale(Sombrero::FastVector3(2, 1, 1) * config.showTestPlane);
         _testPlane->get_transform()->set_localPosition({0, 0.1, 2});
         _testPlane->get_transform()->set_localEulerAngles({80, 0, 0});
         UnityEngine::Object::DontDestroyOnLoad(_testPlane);
