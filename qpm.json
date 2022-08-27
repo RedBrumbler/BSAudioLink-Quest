@@ -4,7 +4,7 @@
   "info": {
     "name": "AudioLink",
     "id": "bs-audiolink",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "url": null,
     "additionalData": {
       "overrideSoName": "libbs-audiolink.so"
