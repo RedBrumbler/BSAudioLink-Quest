@@ -19,7 +19,7 @@ void SaveConfig() {
     doc.RemoveAllMembers();
     doc.SetObject();
     rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
-    Save(makeTestPlane);
+    Save(showTestPlane);
     get_config().Write();
     getLogger().info("Saved Configuration!");
 }
@@ -36,7 +36,7 @@ bool LoadConfig() {
     bool foundEverything = true;
     rapidjson::Document& doc = get_config().config;
 
-    GET_BOOL(makeTestPlane);
+    GET_BOOL(showTestPlane);
 
     if (foundEverything)
         getLogger().info("Loaded Configuration!");

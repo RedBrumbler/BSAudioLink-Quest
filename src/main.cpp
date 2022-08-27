@@ -32,8 +32,6 @@ Logger& getLogger() {
     return *logger;
 }
 
-bool provideMenu = true;
-
 void InstallApp(Zenject::MonoInstaller* self) {
     getLogger().info("Install App");
     auto container = self->get_Container();
@@ -42,14 +40,12 @@ void InstallApp(Zenject::MonoInstaller* self) {
 
 void InstallPlayer(Zenject::MonoInstaller* self) {
     getLogger().info("Install Player");
-    provideMenu = false;
     auto container = self->get_Container();
     container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
 }
 
 void InstallMenu(Zenject::MonoInstaller* self) {
     getLogger().info("Install Menu");
-    provideMenu = true;
     auto container = self->get_Container();
     container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
 }
@@ -100,10 +96,6 @@ MAKE_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &GlobalNamespace::MenuTransit
 MAKE_HOOK_MATCH(SongPreviewPlayer_CrossFadeTo, static_cast<void (GlobalNamespace::SongPreviewPlayer::*)(::UnityEngine::AudioClip*, float, float, float, bool, ::System::Action*)>(&GlobalNamespace::SongPreviewPlayer::CrossfadeTo), void, GlobalNamespace::SongPreviewPlayer* self, ::UnityEngine::AudioClip* audioClip, float musicVolume, float startTime, float duration, bool isDefault, ::System::Action* onFadeOutCallback) {
     getLogger().info("SongPreviewPlayer_CrossFadeTo");
     SongPreviewPlayer_CrossFadeTo(self, audioClip, musicVolume, startTime, duration, isDefault, onFadeOutCallback);
-    if (!provideMenu) {
-        getLogger().info("Provide menu blocked!");
-        return;
-    }
     auto menuProvider = AudioLink::MenuProvider::get_instance();
     if (menuProvider) {
         menuProvider->SongPreviewPlayerProvide(self->activeChannel, self->audioSourceControllers);
@@ -115,10 +107,6 @@ MAKE_HOOK_MATCH(SongPreviewPlayer_CrossFadeTo, static_cast<void (GlobalNamespace
 MAKE_HOOK_MATCH(ColorManagerInstaller_InstallBindings, &GlobalNamespace::ColorManagerInstaller::InstallBindings, void, GlobalNamespace::ColorManagerInstaller* self) {
     getLogger().info("ColorManagerInstaller_InstallBindings");
     ColorManagerInstaller_InstallBindings(self);
-    if (!provideMenu) {
-        getLogger().info("Provide menu blocked!");
-        return;
-    }
     auto menuProvider = AudioLink::MenuProvider::get_instance();
     if (menuProvider) {
         menuProvider->ColorManagerInstallerProvide(self->menuColorScheme);

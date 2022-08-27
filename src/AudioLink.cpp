@@ -85,18 +85,14 @@ namespace AudioLink {
         Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
         _initialized = true;
 
-        if (config.makeTestPlane) {
-            _testPlane = UnityEngine::GameObject::CreatePrimitive(UnityEngine::PrimitiveType::Plane);
-            _testPlane->get_transform()->set_localScale({0.2, 0.2, 0.1});
-            _testPlane->get_transform()->set_localPosition({0, 0.1, 2});
-            _testPlane->get_transform()->set_localEulerAngles({-10, 0, 0});
-            UnityEngine::Object::DontDestroyOnLoad(_testPlane);
-            auto mat = _testPlane->GetComponent<UnityEngine::Renderer*>()->get_material();
-            mat->set_shader(Shader::Find("Unlit/Texture"));
-            std::string matname = mat->get_name();
-            getLogger().info("Material: %s", matname.c_str());
-            mat->set_mainTexture(audioRenderTexture);
-        }
+        _testPlane = UnityEngine::GameObject::CreatePrimitive(UnityEngine::PrimitiveType::Quad);
+        _testPlane->get_transform()->set_localScale(Vector3{2, 1, 1} * (config.showTestPlane || true));
+        _testPlane->get_transform()->set_localPosition({0, 0.1, 2});
+        _testPlane->get_transform()->set_localEulerAngles({80, 0, 0});
+        UnityEngine::Object::DontDestroyOnLoad(_testPlane);
+        auto mat = _testPlane->GetComponent<UnityEngine::Renderer*>()->get_material();
+        mat->set_shader(Shader::Find("Unlit/Texture"));
+        mat->set_mainTexture(audioRenderTexture);
     }
 
     void AudioLink::Tick() {
