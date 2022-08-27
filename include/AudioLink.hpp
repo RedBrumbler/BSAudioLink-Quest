@@ -1,25 +1,31 @@
 #pragma once
 
 #include "custom-types/shared/macros.hpp"
+#include "Zenject/ILateTickable.hpp"
 #include "Zenject/ITickable.hpp"
+#include "Zenject/IInitializable.hpp"
 #include "Zenject/DiContainer.hpp"
 
 #include "UnityEngine/Material.hpp"
 #include "UnityEngine/AudioSource.hpp"
+#include "UnityEngine/GameObject.hpp"
 
 #include "GlobalNamespace/ColorScheme.hpp"
 
 #include "sombrero/shared/FastColor.hpp"
 #include "private_field.hpp"
 
+#define INTERFACES {classof(Zenject::ITickable*), classof(Zenject::IInitializable*)}
+
 // based on https://github.com/Aeroluna/BSAudioLink/blob/master/AudioLink/Scripts/AudioLink.cs
-DECLARE_CLASS_CODEGEN_INTERFACES(AudioLink, AudioLink, Il2CppObject, classof(Zenject::ITickable*),
+___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP_TYPE_CLASS, Il2CppObject, "AudioLink", INTERFACES, 0, nullptr,
     DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor0);
     DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor1);
     DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor2);
     DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor3);
     DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::AudioSource*, _audioSource);
     DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::Material*, _audioMaterial);
+    DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::GameObject*, _testPlane);
 
     DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<float>, _audioFramesL);
     DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<float>, _audioFramesR);
@@ -47,8 +53,8 @@ DECLARE_CLASS_CODEGEN_INTERFACES(AudioLink, AudioLink, Il2CppObject, classof(Zen
     DECLARE_INSTANCE_METHOD(ArrayW<float>, get_samples);
 
     DECLARE_OVERRIDE_METHOD(void, Tick, il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::ITickable::Tick>::get());
+    DECLARE_OVERRIDE_METHOD(void, Initialize, il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::IInitializable::Initialize>::get());
 
-    DECLARE_INSTANCE_METHOD(void, Initialize);
     DECLARE_INSTANCE_METHOD(void, UpdateSettings);
     DECLARE_INSTANCE_METHOD(void, UpdateThemeColors);
     DECLARE_INSTANCE_METHOD(void, FPSUpdate);

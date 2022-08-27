@@ -5,7 +5,12 @@
 #include "ShaderProperties.hpp"
 
 #include "UnityEngine/Time.hpp"
+#include "UnityEngine/Graphics.hpp"
 #include "UnityEngine/Vector4.hpp"
+#include "UnityEngine/PrimitiveType.hpp"
+#include "UnityEngine/Renderer.hpp"
+#include "UnityEngine/Texture2D.hpp"
+#include "UnityEngine/Transform.hpp"
 #include "UnityEngine/Rendering/RenderTextureSubElement.hpp"
 #include <chrono>
 
@@ -22,6 +27,9 @@ void GetOutputDataHelper(UnityEngine::AudioSource* instance, ArrayW<float>& out,
 
 inline float GetSpatialBlendMix(UnityEngine::AudioSource* self) {
     // this is what the icall in unity does, so this is what we will do
+    // TODO: fix the icall because what we do now is just a no
+    return 0.0f;
+
     if (!self) return 0.0f;
     auto obj = *(long *)(self + 0x90);
     if (!obj) return 0.0f;
@@ -39,23 +47,22 @@ namespace AudioLink {
         _audioFramesR = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
         _samples = ArrayW<float>(il2cpp_array_size_t(1023));
 
-        _audioSource = nullptr;
-
         _customThemeColor0 = Sombrero::FastColor::red();
         _customThemeColor1 = Sombrero::FastColor::cyan();
         _customThemeColor2 = Sombrero::FastColor::pink();
         _customThemeColor3 = Sombrero::FastColor::lightblue();
 
-        AssetBundleManager::get_instance()->Load();
-        Initialize();
     }
 
     void AudioLink::SetAudioSource(UnityEngine::AudioSource* audioSource) {
-        _audioSource = audioSource;
+        getLogger().info("Set AudioSource: %p", audioSource);
+        static auto _audioSource_info = il2cpp_functions::class_get_field_from_name(klass, "_audioSource");
+        il2cpp_functions::field_set_value_object(this, _audioSource_info, audioSource);
     }
 
     void AudioLink::SetColorScheme(GlobalNamespace::ColorScheme* colorScheme) {
         if (!colorScheme) return;
+        getLogger().info("Set ColorScheme: %p", colorScheme);
         _customThemeColor0 = colorScheme->get_environmentColor0();
         _customThemeColor1 = colorScheme->get_environmentColor1();
         _customThemeColor2 = colorScheme->get_environmentColor0Boost();
@@ -66,13 +73,25 @@ namespace AudioLink {
 
     void AudioLink::Initialize() {
         getLogger().info("AudioLink Initialize");
+        AssetBundleManager::get_instance()->Load();
+        
         auto manager = AssetBundleManager::get_instance();
-        _audioMaterial = manager->get_material();
+        static auto _audioMaterial_info = il2cpp_functions::class_get_field_from_name(klass, "_audioMaterial");
+        il2cpp_functions::field_set_value_object(this, _audioMaterial_info, manager->get_material());
         auto audioRenderTexture = manager->get_renderTexture();
 
         getLogger().info("SetGlobalRenderTexture");
         Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
         _initialized = true;
+
+        _testPlane = UnityEngine::GameObject::CreatePrimitive(UnityEngine::PrimitiveType::Plane);
+        _testPlane->get_transform()->set_localScale({0.2, 0.2, 0.1});
+        _testPlane->get_transform()->set_localPosition({0, 0.01, 2});
+        UnityEngine::Object::DontDestroyOnLoad(_testPlane);
+        auto mat = _testPlane->GetComponent<UnityEngine::Renderer*>()->get_material();
+        std::string matname = mat->get_name();
+        getLogger().info("Material: %s", matname.c_str());
+        mat->set_mainTexture(audioRenderTexture);
     }
 
     void AudioLink::Tick() {
@@ -228,25 +247,23 @@ namespace AudioLink {
             _ignoreRightChannel = _audioFramesR[0] == 0.0f;
         }
 
-        if (_audioMaterial && _audioMaterial->m_CachedPtr.m_value) {
-            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 0), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples0L, _samples);
-            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 1), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples1L, _samples);
-            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 2), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples2L, _samples);
-            memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 3), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples3L, _samples);
+        memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 0), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples0L, _samples);
+        memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 1), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples1L, _samples);
+        memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 2), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples2L, _samples);
+        memcpy(_samples.begin(), _audioFramesL.begin() + (1023 * 3), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples3L, _samples);
 
-            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 0), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples0R, _samples);
-            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 1), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples1R, _samples);
-            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 2), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples2R, _samples);
-            memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 3), sizeof(float) * 1023);
-            _audioMaterial->SetFloatArray(ShaderProperties::_samples3R, _samples);
-        }
+        memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 0), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples0R, _samples);
+        memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 1), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples1R, _samples);
+        memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 2), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples2R, _samples);
+        memcpy(_samples.begin(), _audioFramesR.begin() + (1023 * 3), sizeof(float) * 1023);
+        _audioMaterial->SetFloatArray(ShaderProperties::_samples3R, _samples);
     }
 
     /* these methods exist to make the things they return "readonly" */

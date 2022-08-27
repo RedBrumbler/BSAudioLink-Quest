@@ -1,7 +1,10 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "custom-types/shared/register.hpp"
 
+#if __has_include("pinkcore/shared/RequirementAPI.hpp")
 #include "pinkcore/shared/RequirementAPI.hpp"
+#define PINKCORE
+#endif
 
 #include "AssetBundleManager.hpp"
 #include "AudioLink.hpp"
@@ -10,6 +13,7 @@
 
 #include "Zenject/DiContainer.hpp"
 #include "Zenject/FromBinderNonGeneric.hpp"
+#include "Zenject/ConcreteIdBinderGeneric_1.hpp"
 #include "GlobalNamespace/StandardGameplayInstaller.hpp"
 #include "GlobalNamespace/MissionGameplayInstaller.hpp"
 #include "GlobalNamespace/MultiplayerLocalActivePlayerInstaller.hpp"
@@ -27,19 +31,26 @@ Logger& getLogger() {
     return *logger;
 }
 
+bool provideMenu = true;
+
 void InstallApp(Zenject::MonoInstaller* self) {
+    getLogger().info("Install App");
     auto container = self->get_Container();
     container->BindInterfacesAndSelfTo<AudioLink::AudioLink*>()->AsSingle();
 }
 
 void InstallPlayer(Zenject::MonoInstaller* self) {
+    getLogger().info("Install Player");
+    provideMenu = false;
     auto container = self->get_Container();
     container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
 }
 
 void InstallMenu(Zenject::MonoInstaller* self) {
+    getLogger().info("Install Menu");
+    provideMenu = true;
     auto container = self->get_Container();
-    container->BindInterfacesTo<AudioLink::MenuProvider*>()->AsSingle();
+    container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
 }
 
 MAKE_HOOK_MATCH(PCAppInit_InstallBindings, &GlobalNamespace::PCAppInit::InstallBindings, void, GlobalNamespace::PCAppInit* self) {
@@ -88,27 +99,40 @@ MAKE_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &GlobalNamespace::MenuTransit
 MAKE_HOOK_MATCH(SongPreviewPlayer_CrossFadeTo, static_cast<void (GlobalNamespace::SongPreviewPlayer::*)(::UnityEngine::AudioClip*, float, float, float, bool, ::System::Action*)>(&GlobalNamespace::SongPreviewPlayer::CrossfadeTo), void, GlobalNamespace::SongPreviewPlayer* self, ::UnityEngine::AudioClip* audioClip, float musicVolume, float startTime, float duration, bool isDefault, ::System::Action* onFadeOutCallback) {
     getLogger().info("SongPreviewPlayer_CrossFadeTo");
     SongPreviewPlayer_CrossFadeTo(self, audioClip, musicVolume, startTime, duration, isDefault, onFadeOutCallback);
+    if (!provideMenu) {
+        getLogger().info("Provide menu blocked!");
+        return;
+    }
     auto menuProvider = AudioLink::MenuProvider::get_instance();
     if (menuProvider) {
         menuProvider->SongPreviewPlayerProvide(self->activeChannel, self->audioSourceControllers);
+    } else {
+        getLogger().info("No menu provider exists!");
     }
 }
 
 MAKE_HOOK_MATCH(ColorManagerInstaller_InstallBindings, &GlobalNamespace::ColorManagerInstaller::InstallBindings, void, GlobalNamespace::ColorManagerInstaller* self) {
     getLogger().info("ColorManagerInstaller_InstallBindings");
     ColorManagerInstaller_InstallBindings(self);
+    if (!provideMenu) {
+        getLogger().info("Provide menu blocked!");
+        return;
+    }
     auto menuProvider = AudioLink::MenuProvider::get_instance();
     if (menuProvider) {
         menuProvider->ColorManagerInstallerProvide(self->menuColorScheme);
+    } else {
+        getLogger().info("No menu provider exists!");
     }
 }
-
 
 extern "C" void setup(ModInfo& info) {
     info = modInfo;
 }
 
 extern "C" void load() {
+    il2cpp_functions::Init();
+
     custom_types::Register::AutoRegister();
 
     auto& logger = getLogger();
@@ -118,9 +142,13 @@ extern "C" void load() {
     INSTALL_HOOK(logger, MissionGameplayInstaller_InstallBindings);
     INSTALL_HOOK(logger, MultiplayerLocalActivePlayerInstaller_InstallBindings);
     INSTALL_HOOK(logger, MainSettingsMenuViewControllersInstaller_InstallBindings);
+
     INSTALL_HOOK(logger, MenuTransitionsHelper_RestartGame);
     INSTALL_HOOK(logger, SongPreviewPlayer_CrossFadeTo);
     INSTALL_HOOK(logger, ColorManagerInstaller_InstallBindings);
-    
+
+#ifdef PINKCORE
+    // Register installed so maps could use this as a suggestion, or sabers could check if it was installed
     PinkCore::RequirementAPI::RegisterInstalled("AudioLink");
+#endif
 }

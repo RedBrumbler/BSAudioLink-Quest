@@ -30,11 +30,6 @@
       "id": "sombrero",
       "versionRange": "^0.1.35",
       "additionalData": {}
-    },
-    {
-      "id": "pinkcore",
-      "versionRange": "^1.7.0",
-      "additionalData": {}
     }
   ],
   "additionalData": {}

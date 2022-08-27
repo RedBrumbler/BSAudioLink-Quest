@@ -3,13 +3,18 @@
 #include "UnityEngine/Shader.hpp"
 
 
+extern Logger& getLogger();
+
 namespace ShaderProperties {
     struct ShaderPropID {
         template<size_t sz>
         constexpr ShaderPropID(const char (&str)[sz]) : str(str), sz(sz) {}
 
         operator int () const {
-            if (id == 0) id = UnityEngine::Shader::PropertyToID(std::string_view(str, sz)); 
+            if (id == 0) {
+                id = UnityEngine::Shader::PropertyToID(std::string_view(str, sz)); 
+                getLogger().info("Shader Prop '%s': %d", str, id);
+            }
             return id;
         }
 
