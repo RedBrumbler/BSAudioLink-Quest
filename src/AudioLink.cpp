@@ -86,7 +86,7 @@ namespace AudioLink {
         _initialized = true;
 
         _testPlane = UnityEngine::GameObject::CreatePrimitive(UnityEngine::PrimitiveType::Quad);
-        _testPlane->get_transform()->set_localScale(Vector3{2, 1, 1} * (config.showTestPlane || true));
+        _testPlane->get_transform()->set_localScale(Vector3{2, 1, 1} * config.showTestPlane);
         _testPlane->get_transform()->set_localPosition({0, 0.1, 2});
         _testPlane->get_transform()->set_localEulerAngles({80, 0, 0});
         UnityEngine::Object::DontDestroyOnLoad(_testPlane);
