@@ -6,6 +6,7 @@
 #define PINKCORE
 #endif
 
+#include "config.hpp"
 #include "AssetBundleManager.hpp"
 #include "AudioLink.hpp"
 #include "Providers/GameProvider.hpp"
@@ -133,6 +134,7 @@ extern "C" void setup(ModInfo& info) {
 extern "C" void load() {
     il2cpp_functions::Init();
 
+    if (!LoadConfig()) SaveConfig();
     custom_types::Register::AutoRegister();
 
     auto& logger = getLogger();

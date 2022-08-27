@@ -39,10 +39,8 @@ namespace AudioLink {
 
         il2cpp_functions::field_set_value_object(this, _bundle_info, assetBundle_LoadFromMemory(IncludedAssets::Bundle, 0));
         il2cpp_functions::field_set_value_object(this, _material_info, _bundle->LoadAsset<UnityEngine::Material*>("assets/audiolink/materials/mat_audiolink.mat"));
-        auto rt = _bundle->LoadAsset("assets/audiolink/rendertextures/rt_audiolink.asset");
-        auto logger = getLogger().WithContext("RT class");
-        il2cpp_utils::LogClass(logger, rt->klass, true);
 
+        auto rt = _bundle->LoadAsset("assets/audiolink/rendertextures/rt_audiolink.asset");
         il2cpp_functions::field_set_value_object(this, _renderTexture_info, rt);
     }
 
