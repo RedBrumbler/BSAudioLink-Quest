@@ -89,6 +89,7 @@ namespace AudioLink {
         _testPlane->get_transform()->set_localPosition({0, 0.01, 2});
         UnityEngine::Object::DontDestroyOnLoad(_testPlane);
         auto mat = _testPlane->GetComponent<UnityEngine::Renderer*>()->get_material();
+        mat->set_shader(Shader::Find("Unlit/Texture"));
         std::string matname = mat->get_name();
         getLogger().info("Material: %s", matname.c_str());
         mat->set_mainTexture(audioRenderTexture);
