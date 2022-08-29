@@ -30,6 +30,11 @@
       "id": "sombrero",
       "versionRange": "^0.1.35",
       "additionalData": {}
+    },
+    {
+      "id": "lapiz",
+      "versionRange": "^0.0.1",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
