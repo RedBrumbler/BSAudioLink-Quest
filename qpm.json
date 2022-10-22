@@ -5,7 +5,7 @@
     "name": "AudioLink",
     "id": "bs-audiolink",
     "version": "0.0.1",
-    "url": null,
+    "url": "https://github.com/RedBrumbler/BSAudioLink-Quest",
     "additionalData": {
       "overrideSoName": "libbs-audiolink.so"
     }
@@ -13,27 +13,31 @@
   "dependencies": [
     {
       "id": "codegen",
-      "versionRange": "^0.25.0",
+      "versionRange": "^0.28.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.18",
+      "versionRange": "^0.15.21",
       "additionalData": {}
     },
     {
       "id": "beatsaber-hook",
-      "versionRange": "^3.12.0",
-      "additionalData": {}
+      "versionRange": "^3.14.0",
+      "additionalData": {
+        "extraFiles": [
+          "src/inline-hook"
+        ]
+      }
     },
     {
       "id": "sombrero",
-      "versionRange": "^0.1.35",
+      "versionRange": "^0.1.37",
       "additionalData": {}
     },
     {
       "id": "lapiz",
-      "versionRange": "^0.0.1",
+      "versionRange": "^0.1.5",
       "additionalData": {}
     }
   ],
