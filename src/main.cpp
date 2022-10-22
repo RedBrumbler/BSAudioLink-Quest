@@ -66,18 +66,6 @@ extern "C" void setup(ModInfo& info) {
     info = modInfo;
 }
 
-void InstallApp(Zenject::DiContainer* container) {
-    container->BindInterfacesAndSelfTo<AudioLink::AudioLink*>()->AsSingle();
-}
-
-void InstallPlayer(Zenject::DiContainer* container) {
-    container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
-}
-
-void InstallMenu(Zenject::DiContainer* container) {
-    container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
-}
-
 extern "C" void load() {
     il2cpp_functions::Init();
 
@@ -86,9 +74,15 @@ extern "C" void load() {
 
     auto& logger = getLogger();
     auto zenjector = Lapiz::Zenject::Zenjector::Get();
-    zenjector->Install(Lapiz::Zenject::Location::Player, InstallPlayer); 
-    zenjector->Install(Lapiz::Zenject::Location::App, InstallApp);
-    zenjector->Install(Lapiz::Zenject::Location::Menu, InstallMenu);
+    zenjector->Install(Lapiz::Zenject::Location::Player, [](::Zenject::DiContainer* container){
+        container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
+    }); 
+    zenjector->Install(Lapiz::Zenject::Location::App, [](::Zenject::DiContainer* container){
+        container->BindInterfacesAndSelfTo<AudioLink::AudioLink*>()->AsSingle();
+    });
+    zenjector->Install(Lapiz::Zenject::Location::Menu, [](::Zenject::DiContainer* container){
+        container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
+    });
 
     INSTALL_HOOK(logger, MenuTransitionsHelper_RestartGame);
     INSTALL_HOOK(logger, SongPreviewPlayer_CrossFadeTo);
