@@ -25,66 +25,13 @@
 #include "GlobalNamespace/ColorManagerInstaller.hpp"
 #include "GlobalNamespace/SongPreviewPlayer.hpp"
 
+#include "lapiz/shared/zenject/Zenjector.hpp"
+
 ModInfo modInfo{MOD_ID, VERSION};
 
 Logger& getLogger() {
     static Logger* logger = new Logger(modInfo, LoggerOptions(false, true));
     return *logger;
-}
-
-void InstallApp(Zenject::MonoInstaller* self) {
-    getLogger().info("Install App");
-    auto container = self->get_Container();
-    container->BindInterfacesAndSelfTo<AudioLink::AudioLink*>()->AsSingle();
-}
-
-void InstallPlayer(Zenject::MonoInstaller* self) {
-    getLogger().info("Install Player");
-    auto container = self->get_Container();
-    container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
-}
-
-void InstallMenu(Zenject::MonoInstaller* self) {
-    getLogger().info("Install Menu");
-    auto container = self->get_Container();
-    container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
-}
-
-MAKE_HOOK_MATCH(PCAppInit_InstallBindings, &GlobalNamespace::PCAppInit::InstallBindings, void, GlobalNamespace::PCAppInit* self) {
-    getLogger().info("PCAppInit_InstallBindings");
-    PCAppInit_InstallBindings(self);
-    InstallApp(self);
-}
-
-MAKE_HOOK_MATCH(QuestAppInit_InstallBindings, &GlobalNamespace::QuestAppInit::InstallBindings, void, GlobalNamespace::QuestAppInit* self) {
-    getLogger().info("QuestAppInit_InstallBindings");
-    QuestAppInit_InstallBindings(self);
-    InstallApp(self);
-}
-
-
-MAKE_HOOK_MATCH(StandardGameplayInstaller_InstallBindings, &GlobalNamespace::StandardGameplayInstaller::InstallBindings, void, GlobalNamespace::StandardGameplayInstaller* self) {
-    getLogger().info("StandardGameplayInstaller_InstallBindings");
-    StandardGameplayInstaller_InstallBindings(self);
-    InstallPlayer(self);
-}
-
-MAKE_HOOK_MATCH(MissionGameplayInstaller_InstallBindings, &GlobalNamespace::MissionGameplayInstaller::InstallBindings, void, GlobalNamespace::MissionGameplayInstaller* self) {
-    getLogger().info("MissionGameplayInstaller_InstallBindings");
-    MissionGameplayInstaller_InstallBindings(self);
-    InstallPlayer(self);
-}
-
-MAKE_HOOK_MATCH(MultiplayerLocalActivePlayerInstaller_InstallBindings, &GlobalNamespace::MultiplayerLocalActivePlayerInstaller::InstallBindings, void, GlobalNamespace::MultiplayerLocalActivePlayerInstaller* self) {
-    getLogger().info("MultiplayerLocalActivePlayerInstaller_InstallBindings");
-    MultiplayerLocalActivePlayerInstaller_InstallBindings(self);
-    InstallPlayer(self);
-}
-
-MAKE_HOOK_MATCH(MainSettingsMenuViewControllersInstaller_InstallBindings, &GlobalNamespace::MainSettingsMenuViewControllersInstaller::InstallBindings, void, GlobalNamespace::MainSettingsMenuViewControllersInstaller* self) {
-    getLogger().info("MainSettingsMenuViewControllersInstaller_InstallBindings");
-    MainSettingsMenuViewControllersInstaller_InstallBindings(self);
-    InstallMenu(self);
 }
 
 MAKE_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &GlobalNamespace::MenuTransitionsHelper::RestartGame, void, GlobalNamespace::MenuTransitionsHelper* self, System::Action_1<Zenject::DiContainer*>* finishCallback) {
@@ -126,12 +73,16 @@ extern "C" void load() {
     custom_types::Register::AutoRegister();
 
     auto& logger = getLogger();
-    INSTALL_HOOK(logger, PCAppInit_InstallBindings);
-    INSTALL_HOOK(logger, QuestAppInit_InstallBindings);
-    INSTALL_HOOK(logger, StandardGameplayInstaller_InstallBindings);
-    INSTALL_HOOK(logger, MissionGameplayInstaller_InstallBindings);
-    INSTALL_HOOK(logger, MultiplayerLocalActivePlayerInstaller_InstallBindings);
-    INSTALL_HOOK(logger, MainSettingsMenuViewControllersInstaller_InstallBindings);
+    auto zenjector = Lapiz::Zenject::Zenjector::Get();
+    zenjector->Install(Lapiz::Zenject::Location::Player, [](::Zenject::DiContainer* container){
+        container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
+    }); 
+    zenjector->Install(Lapiz::Zenject::Location::App, [](::Zenject::DiContainer* container){
+        container->BindInterfacesAndSelfTo<AudioLink::AudioLink*>()->AsSingle();
+    });
+    zenjector->Install(Lapiz::Zenject::Location::Menu, [](::Zenject::DiContainer* container){
+        container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
+    });
 
     INSTALL_HOOK(logger, MenuTransitionsHelper_RestartGame);
     INSTALL_HOOK(logger, SongPreviewPlayer_CrossFadeTo);
