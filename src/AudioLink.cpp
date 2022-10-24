@@ -95,6 +95,12 @@ namespace AudioLink {
         mat->set_mainTexture(audioRenderTexture);
     }
 
+    void AudioLink::Dispose() {
+        if (_testPlane && _testPlane->m_CachedPtr.m_value) 
+            UnityEngine::Object::DestroyImmediate(_testPlane);
+        _testPlane = nullptr;
+    }
+
     void AudioLink::Tick() {
         if (!_initialized) return;
         _elapsedTime = Time::get_deltaTime();

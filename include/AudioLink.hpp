@@ -6,6 +6,7 @@
 #include "Zenject/ITickable.hpp"
 #include "Zenject/IInitializable.hpp"
 #include "Zenject/DiContainer.hpp"
+#include "System/IDisposable.hpp"
 
 #include "UnityEngine/Material.hpp"
 #include "UnityEngine/AudioSource.hpp"
@@ -15,7 +16,7 @@
 
 #include "sombrero/shared/FastColor.hpp"
 
-#define INTERFACES {classof(Zenject::ITickable*), classof(Zenject::IInitializable*)}
+#define INTERFACES {classof(Zenject::ITickable*), classof(Zenject::IInitializable*), classof(::System::IDisposable*)}
 
 // based on https://github.com/Aeroluna/BSAudioLink/blob/master/AudioLink/Scripts/AudioLink.cs
 ___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP_TYPE_CLASS, Il2CppObject, "AudioLink", INTERFACES, 0, nullptr,
@@ -52,8 +53,9 @@ ___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP
     DECLARE_INSTANCE_METHOD(ArrayW<float>, get_audioFramesR);
     DECLARE_INSTANCE_METHOD(ArrayW<float>, get_samples);
 
-    DECLARE_OVERRIDE_METHOD(void, Tick, il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::ITickable::Tick>::get());
-    DECLARE_OVERRIDE_METHOD(void, Initialize, il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::IInitializable::Initialize>::get());
+    DECLARE_OVERRIDE_METHOD(void, Tick, il2cpp_utils::il2cpp_type_check::MetadataGetter<&::Zenject::ITickable::Tick>::get());
+    DECLARE_OVERRIDE_METHOD(void, Initialize, il2cpp_utils::il2cpp_type_check::MetadataGetter<&::Zenject::IInitializable::Initialize>::get());
+    DECLARE_OVERRIDE_METHOD(void, Dispose, il2cpp_utils::il2cpp_type_check::MetadataGetter<&::System::IDisposable::Dispose>::get());
 
     DECLARE_INSTANCE_METHOD(void, UpdateSettings);
     DECLARE_INSTANCE_METHOD(void, UpdateThemeColors);
