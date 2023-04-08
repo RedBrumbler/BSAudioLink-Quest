@@ -18,7 +18,7 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.32.0",
+      "versionRange": "^0.33.0",
       "additionalData": {}
     },
     {
@@ -42,7 +42,7 @@
     },
     {
       "id": "lapiz",
-      "versionRange": "^0.1.10",
+      "versionRange": "^0.1.11",
       "additionalData": {}
     }
   ],
