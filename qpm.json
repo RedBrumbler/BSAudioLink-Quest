@@ -12,13 +12,18 @@
   },
   "dependencies": [
     {
+      "id": "libil2cpp",
+      "versionRange": "^0.2.3",
+      "additionalData": {}
+    },
+    {
       "id": "codegen",
-      "versionRange": "^0.28.0",
+      "versionRange": "^0.32.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.21",
+      "versionRange": "^0.15.23",
       "additionalData": {}
     },
     {
@@ -37,9 +42,29 @@
     },
     {
       "id": "lapiz",
-      "versionRange": "^0.1.5",
+      "versionRange": "^0.1.10",
       "additionalData": {}
     }
   ],
-  "additionalData": {}
+  "workspace": {
+    "scripts": {
+      "build": [
+        "pwsh ./scripts/build.ps1"
+      ],
+      "clean": [
+        "pwsh ./scripts/build.ps1 -clean"
+      ],
+      "copy": [
+        "pwsh ./scripts/copy.ps1"
+      ],
+      "log": [
+        "pwsh ./scripts/log.ps1"
+      ],
+      "qmod": [
+        "pwsh ./scripts/build.ps1 -clean",
+        "qpm-rust qmod build",
+        "pwsh ./scripts/createqmod.ps1 AudioLink -clean"
+      ]
+    }
+  }
 }
