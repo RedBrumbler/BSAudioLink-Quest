@@ -4,7 +4,7 @@
   "info": {
     "name": "AudioLink",
     "id": "bs-audiolink",
-    "version": "0.0.1",
+    "version": "0.1.5",
     "url": "https://github.com/RedBrumbler/BSAudioLink-Quest",
     "additionalData": {
       "overrideSoName": "libbs-audiolink.so"
@@ -48,14 +48,14 @@
   ],
   "workspace": {
     "scripts": {
-      "build": [
-        "pwsh ./scripts/build.ps1"
-      ],
       "clean": [
         "pwsh ./scripts/build.ps1 -clean"
       ],
       "copy": [
         "pwsh ./scripts/copy.ps1"
+      ],
+      "build": [
+        "pwsh ./scripts/build.ps1"
       ],
       "log": [
         "pwsh ./scripts/log.ps1"
