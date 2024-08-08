@@ -1,5 +1,6 @@
 {
   "config": {
+    "version": "0.1.0",
     "sharedDir": "shared",
     "dependenciesDir": "extern",
     "info": {
@@ -8,33 +9,54 @@
       "version": "0.0.1",
       "url": "https://github.com/RedBrumbler/BSAudioLink-Quest",
       "additionalData": {
-        "overrideSoName": "libbs-audiolink.so"
+        "overrideSoName": "libbs-audiolink.so",
+        "cmake": false
       }
+    },
+    "workspace": {
+      "scripts": {
+        "build": [
+          "pwsh ./scripts/build.ps1"
+        ],
+        "clean": [
+          "pwsh ./scripts/build.ps1 -clean"
+        ],
+        "copy": [
+          "pwsh ./scripts/copy.ps1"
+        ],
+        "log": [
+          "pwsh ./scripts/log.ps1"
+        ],
+        "qmod": [
+          "pwsh ./scripts/build.ps1 -clean",
+          "qpm-rust qmod manifest",
+          "pwsh ./scripts/createqmod.ps1 AudioLink -clean"
+        ]
+      },
+      "qmodIncludeDirs": [],
+      "qmodIncludeFiles": [],
+      "qmodOutput": null
     },
     "dependencies": [
       {
         "id": "libil2cpp",
-        "versionRange": "^0.2.3",
+        "versionRange": "^0.3.0",
         "additionalData": {}
       },
       {
-        "id": "codegen",
-        "versionRange": "^0.33.0",
+        "id": "bs-cordl",
+        "versionRange": "^3701.0.0",
         "additionalData": {}
       },
       {
         "id": "custom-types",
-        "versionRange": "^0.15.23",
+        "versionRange": "^0.17.10",
         "additionalData": {}
       },
       {
         "id": "beatsaber-hook",
-        "versionRange": "^3.14.0",
-        "additionalData": {
-          "extraFiles": [
-            "src/inline-hook"
-          ]
-        }
+        "versionRange": "^5.1.9",
+        "additionalData": {}
       },
       {
         "id": "sombrero",
@@ -43,140 +65,160 @@
       },
       {
         "id": "lapiz",
-        "versionRange": "^0.1.11",
+        "versionRange": "^0.2.13",
+        "additionalData": {}
+      },
+      {
+        "id": "scotland2",
+        "versionRange": "^0.1.4",
+        "additionalData": {}
+      },
+      {
+        "id": "kaleb",
+        "versionRange": "^0.1.9",
+        "additionalData": {}
+      },
+      {
+        "id": "paper",
+        "versionRange": "^3.6.4",
         "additionalData": {}
       }
-    ],
-    "workspace": {
-      "scripts": {
-        "log": [
-          "pwsh ./scripts/log.ps1"
-        ],
-        "clean": [
-          "pwsh ./scripts/build.ps1 -clean"
-        ],
-        "qmod": [
-          "pwsh ./scripts/build.ps1 -clean",
-          "qpm-rust qmod build",
-          "pwsh ./scripts/createqmod.ps1 AudioLink -clean"
-        ],
-        "build": [
-          "pwsh ./scripts/build.ps1"
-        ],
-        "copy": [
-          "pwsh ./scripts/copy.ps1"
-        ]
-      }
-    }
+    ]
   },
   "restoredDependencies": [
     {
       "dependency": {
         "id": "libil2cpp",
-        "versionRange": "=0.2.3",
+        "versionRange": "=0.3.2",
         "additionalData": {
-          "headersOnly": true
+          "headersOnly": true,
+          "cmake": false
         }
       },
-      "version": "0.2.3"
-    },
-    {
-      "dependency": {
-        "id": "modloader",
-        "versionRange": "=1.2.3",
-        "additionalData": {
-          "soLink": "https://github.com/sc2ad/QuestLoader/releases/download/v1.2.3/libmodloader64.so",
-          "overrideSoName": "libmodloader.so",
-          "branchName": "version-v1.2.3"
-        }
-      },
-      "version": "1.2.3"
+      "version": "0.3.2"
     },
     {
       "dependency": {
         "id": "paper",
-        "versionRange": "=1.2.9",
+        "versionRange": "=3.6.4",
         "additionalData": {
-          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.9/libpaperlog.so",
-          "debugSoLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.9/debug_libpaperlog.so",
+          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.4/libpaperlog.so",
+          "debugSoLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.4/debug_libpaperlog.so",
           "overrideSoName": "libpaperlog.so",
-          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.9/paperlog.qmod",
-          "branchName": "version-v1.2.9"
+          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v3.6.4/paperlog.qmod",
+          "branchName": "version/v3_6_4",
+          "compileOptions": {
+            "systemIncludes": [
+              "shared/utfcpp/source"
+            ]
+          },
+          "cmake": false
         }
       },
-      "version": "1.2.9"
+      "version": "3.6.4"
     },
     {
       "dependency": {
         "id": "custom-types",
-        "versionRange": "=0.15.23",
+        "versionRange": "=0.17.10",
         "additionalData": {
-          "soLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.23/libcustom-types.so",
-          "debugSoLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.23/debug_libcustom-types.so",
+          "soLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.10/libcustom-types.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.10/debug_libcustom-types.so",
           "overrideSoName": "libcustom-types.so",
-          "modLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.23/CustomTypes.qmod",
-          "branchName": "version-v0.15.23"
+          "modLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.10/CustomTypes.qmod",
+          "branchName": "version/v0_17_10",
+          "compileOptions": {
+            "cppFlags": [
+              "-Wno-invalid-offsetof"
+            ]
+          },
+          "cmake": true
         }
       },
-      "version": "0.15.23"
+      "version": "0.17.10"
     },
     {
       "dependency": {
         "id": "sombrero",
-        "versionRange": "=0.1.37",
+        "versionRange": "=0.1.42",
         "additionalData": {
           "headersOnly": true,
-          "branchName": "version-v0.1.37"
+          "branchName": "version/v0_1_42"
         }
       },
-      "version": "0.1.37"
+      "version": "0.1.42"
+    },
+    {
+      "dependency": {
+        "id": "bs-cordl",
+        "versionRange": "=3701.0.0",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version/v3701_0_0",
+          "compileOptions": {
+            "includePaths": [
+              "include"
+            ],
+            "cppFeatures": [],
+            "cppFlags": [
+              "-DNEED_UNSAFE_CSHARP",
+              "-fdeclspec",
+              "-DUNITY_2021",
+              "-DHAS_CODEGEN"
+            ]
+          }
+        }
+      },
+      "version": "3701.0.0"
     },
     {
       "dependency": {
         "id": "lapiz",
-        "versionRange": "=0.1.11",
+        "versionRange": "=0.2.13",
         "additionalData": {
-          "soLink": "https://github.com/raineio/Lapiz/releases/download/v0.1.11/liblapiz.so",
-          "debugSoLink": "https://github.com/raineio/Lapiz/releases/download/v0.1.11/debug_liblapiz.so",
+          "soLink": "https://github.com/raineio/Lapiz/releases/download/v0.2.13/liblapiz.so",
+          "debugSoLink": "https://github.com/raineio/Lapiz/releases/download/v0.2.13/debug_liblapiz.so",
           "overrideSoName": "liblapiz.so",
-          "modLink": "https://github.com/raineio/Lapiz/releases/download/v0.1.11/Lapiz.qmod",
-          "branchName": "version-v0.1.11"
+          "modLink": "https://github.com/raineio/Lapiz/releases/download/v0.2.13/Lapiz.qmod",
+          "branchName": "version/v0_2_13",
+          "cmake": true
         }
       },
-      "version": "0.1.11"
-    },
-    {
-      "dependency": {
-        "id": "codegen",
-        "versionRange": "=0.33.0",
-        "additionalData": {
-          "soLink": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.33.0/libcodegen.so",
-          "overrideSoName": "libcodegen.so",
-          "modLink": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.33.0/Codegen.qmod",
-          "branchName": "version-v0.33.0"
-        }
-      },
-      "version": "0.33.0"
+      "version": "0.2.13"
     },
     {
       "dependency": {
         "id": "beatsaber-hook",
-        "versionRange": "=3.14.0",
+        "versionRange": "=5.1.9",
         "additionalData": {
-          "soLink": "https://github.com/sc2ad/beatsaber-hook/releases/download/v3.14.0/libbeatsaber-hook_3_14_0.so",
-          "debugSoLink": "https://github.com/sc2ad/beatsaber-hook/releases/download/v3.14.0/debug_libbeatsaber-hook_3_14_0.so",
-          "branchName": "version-v3.14.0"
+          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.9/libbeatsaber-hook_5_1_9.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.9/debug_libbeatsaber-hook_5_1_9.so",
+          "branchName": "version/v5_1_9",
+          "cmake": true
         }
       },
-      "version": "3.14.0"
+      "version": "5.1.9"
+    },
+    {
+      "dependency": {
+        "id": "scotland2",
+        "versionRange": "=0.1.4",
+        "additionalData": {
+          "soLink": "https://github.com/sc2ad/scotland2/releases/download/v0.1.4/libsl2.so",
+          "debugSoLink": "https://github.com/sc2ad/scotland2/releases/download/v0.1.4/debug_libsl2.so",
+          "overrideSoName": "libsl2.so",
+          "branchName": "version/v0_1_4"
+        }
+      },
+      "version": "0.1.4"
     },
     {
       "dependency": {
         "id": "fmt",
-        "versionRange": "=9.0.0",
+        "versionRange": "=10.0.0",
         "additionalData": {
           "headersOnly": true,
-          "branchName": "version-v9.0.0",
+          "branchName": "version/v10_0_0",
           "compileOptions": {
             "systemIncludes": [
               "fmt/include/"
@@ -187,7 +229,24 @@
           }
         }
       },
-      "version": "9.0.0"
+      "version": "10.0.0"
+    },
+    {
+      "dependency": {
+        "id": "kaleb",
+        "versionRange": "=0.1.9",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version/v0_1_9",
+          "compileOptions": {
+            "cppFlags": [
+              "-DKALEB_VERSION=\"0.1.9\""
+            ]
+          },
+          "cmake": false
+        }
+      },
+      "version": "0.1.9"
     }
   ]
 }

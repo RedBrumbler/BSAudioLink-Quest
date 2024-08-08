@@ -1,14 +1,12 @@
 #include "AssetBundleManager.hpp"
+#include "logging.hpp"
 
-#include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "UnityEngine/AssetBundleRequest.hpp"
 #include "UnityEngine/AssetBundleCreateRequest.hpp"
 
 #include "assets.hpp"
 
 DEFINE_TYPE(AudioLink, AssetBundleManager);
-
-extern Logger& getLogger();
 
 namespace AudioLink {
     UnityEngine::Material* AssetBundleManager::get_material() {
@@ -28,7 +26,7 @@ namespace AudioLink {
         static auto _material_info = il2cpp_functions::class_get_field_from_name(klass, "_material");
         static auto _renderTexture_info = il2cpp_functions::class_get_field_from_name(klass, "_renderTexture");
 
-        auto bundle = assetBundle_LoadFromMemory(IncludedAssets::Bundle, 0);
+        auto bundle = assetBundle_LoadFromMemory(Assets::Bundle, 0);
         il2cpp_functions::field_set_value_object(this, _bundle_info, bundle);
 
         auto material = bundle->LoadAsset<UnityEngine::Material*>("assets/audiolink/materials/mat_audiolink.mat");
@@ -36,11 +34,10 @@ namespace AudioLink {
 
         auto rt = bundle->LoadAsset("assets/audiolink/rendertextures/rt_audiolink.asset");
         il2cpp_functions::field_set_value_object(this, _renderTexture_info, rt);
-        getLogger().flush();
     }
 
     void AssetBundleManager::Dispose() {
-        getLogger().info("AssetBundleManager RestartGame");
+        INFO("AssetBundleManager RestartGame");
         static auto _bundle_info = il2cpp_functions::class_get_field_from_name(klass, "_bundle");
         static auto _material_info = il2cpp_functions::class_get_field_from_name(klass, "_material");
         static auto _renderTexture_info = il2cpp_functions::class_get_field_from_name(klass, "_renderTexture");

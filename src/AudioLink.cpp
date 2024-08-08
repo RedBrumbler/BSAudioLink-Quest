@@ -40,12 +40,10 @@ inline float GetSpatialBlendMix(UnityEngine::AudioSource* self) {
     return *(float*)(obj + 4);
 }
 
-extern Logger& getLogger();
-
 namespace AudioLink {
 
     void AudioLink::ctor(AssetBundleManager* assetBundleManager) {
-        getLogger().info("AudioLink ctor");
+        INFO("AudioLink ctor");
 
         _audioFramesL = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
         _audioFramesR = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
@@ -61,14 +59,14 @@ namespace AudioLink {
     }
 
     void AudioLink::SetAudioSource(UnityEngine::AudioSource* audioSource) {
-        getLogger().info("Set AudioSource: %p", audioSource);
+        INFO("Set AudioSource: {}", fmt::ptr(audioSource));
         static auto _audioSource_info = il2cpp_functions::class_get_field_from_name(klass, "_audioSource");
         il2cpp_functions::field_set_value_object(this, _audioSource_info, audioSource);
     }
 
     void AudioLink::SetColorScheme(GlobalNamespace::ColorScheme* colorScheme) {
         if (!colorScheme) return;
-        getLogger().info("Set ColorScheme: %p", colorScheme);
+        INFO("Set ColorScheme: {}", fmt::ptr(colorScheme));
         _customThemeColor0 = colorScheme->get_environmentColor0();
         _customThemeColor1 = colorScheme->get_environmentColor1();
         _customThemeColor2 = colorScheme->get_environmentColor0Boost();
@@ -78,14 +76,14 @@ namespace AudioLink {
     }
 
     void AudioLink::Initialize() {
-        getLogger().info("AudioLink Initialize");
+        INFO("AudioLink Initialize");
         _assetBundleManager->Load();
 
         static auto _audioMaterial_info = il2cpp_functions::class_get_field_from_name(klass, "_audioMaterial");
         il2cpp_functions::field_set_value_object(this, _audioMaterial_info, _assetBundleManager->get_material());
         auto audioRenderTexture = _assetBundleManager->get_renderTexture();
 
-        getLogger().info("SetGlobalRenderTexture");
+        INFO("SetGlobalRenderTexture");
         Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
         _initialized = true;
 
@@ -128,7 +126,7 @@ namespace AudioLink {
             FPSUpdate();
         }
 
-        if (_audioMaterial && _audioMaterial->m_CachedPtr) {
+        if (_audioMaterial && _audioMaterial->m_CachedPtr.m_value) {
             time_t rawtime = time(nullptr);
             auto timeInfo = localtime(&rawtime);
             unsigned long long timeOfDay = timeInfo->tm_hour * 60 * 60 + // hours since midnight * 60 * 60 for seconds since midnight
@@ -167,7 +165,7 @@ namespace AudioLink {
     }
 
     void AudioLink::UpdateSettings() {
-        getLogger().info("Updating Settings");
+        INFO("Updating Settings");
         if (!_audioMaterial || !_audioMaterial->m_CachedPtr.m_value) return;
         _audioMaterial->SetFloat(ShaderProperties::_x0, ConfigProperties::X0);
         _audioMaterial->SetFloat(ShaderProperties::_x1, ConfigProperties::X1);
@@ -185,7 +183,7 @@ namespace AudioLink {
     }
 
     void AudioLink::UpdateThemeColors() {
-        getLogger().info("Updating Color Scheme");
+        INFO("Updating Color Scheme");
         if (!_audioMaterial || !_audioMaterial->m_CachedPtr.m_value) return;
         _audioMaterial->SetInt(ShaderProperties::_themeColorMode, ConfigProperties::THEME_COLOR_MODE);
         _audioMaterial->SetColor(ShaderProperties::_customThemeColor0ID, _customThemeColor0);
@@ -199,8 +197,8 @@ namespace AudioLink {
             _audioMaterial->SetVector(ShaderProperties::_versionNumberAndFPSProperty, Vector4(ConfigProperties::AUDIOLINK_VERSION_NUMBER, 0, _fPSCount, 1));
             _audioMaterial->SetVector(ShaderProperties::_playerCountAndData, {0, 0, 0, 0});
         } else {
-            getLogger().error("_audioMaterial %p was not valid!\n", _audioMaterial);
-            getLogger().error("Some properties have not been set...");
+            ERROR("_audioMaterial {} was not valid!\n", fmt::ptr(_audioMaterial));
+            ERROR("Some properties have not been set...");
         }
 
         _fPSCount = 0;

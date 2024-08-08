@@ -1,9 +1,7 @@
 #pragma once
 
 #include "UnityEngine/Shader.hpp"
-
-
-extern Logger& getLogger();
+#include "logging.hpp"
 
 namespace ShaderProperties {
     struct ShaderPropID {
@@ -12,8 +10,8 @@ namespace ShaderProperties {
 
         operator int () const {
             if (id == 0) {
-                id = UnityEngine::Shader::PropertyToID(std::string_view(str, sz)); 
-                getLogger().info("Shader Prop '%s': %d", str, id);
+                id = UnityEngine::Shader::PropertyToID(std::string_view(str, sz));
+                INFO("Shader Prop '{}': {}", str, id);
             }
             return id;
         }

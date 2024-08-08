@@ -17,33 +17,31 @@
 #include "sombrero/shared/FastColor.hpp"
 #include "AssetBundleManager.hpp"
 
-#define INTERFACES {classof(Zenject::ITickable*), classof(Zenject::IInitializable*), classof(::System::IDisposable*)}
-
 // based on https://github.com/Aeroluna/BSAudioLink/blob/master/AudioLink/Scripts/AudioLink.cs
-___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP_TYPE_CLASS, Il2CppObject, "AudioLink", INTERFACES, 0, nullptr,
-    DECLARE_PRIVATE_FIELD(Sombrero::FastColor, _customThemeColor0);
-    DECLARE_PRIVATE_FIELD(Sombrero::FastColor, _customThemeColor1);
-    DECLARE_PRIVATE_FIELD(Sombrero::FastColor, _customThemeColor2);
-    DECLARE_PRIVATE_FIELD(Sombrero::FastColor, _customThemeColor3);
-    DECLARE_PRIVATE_FIELD(UnityEngine::AudioSource*, _audioSource);
-    DECLARE_PRIVATE_FIELD(UnityEngine::Material*, _audioMaterial);
-    DECLARE_PRIVATE_FIELD(UnityEngine::GameObject*, _testPlane);
-    DECLARE_PRIVATE_FIELD(AssetBundleManager*, _assetBundleManager);
+DECLARE_CLASS_CODEGEN_INTERFACES(AudioLink, AudioLink, System::Object, std::vector<Il2CppClass*>({classof(Zenject::ITickable*), classof(Zenject::IInitializable*), classof(::System::IDisposable*)}),
+    DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor0);
+    DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor1);
+    DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor2);
+    DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastColor, _customThemeColor3);
+    DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::AudioSource*, _audioSource);
+    DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::Material*, _audioMaterial);
+    DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::GameObject*, _testPlane);
+    DECLARE_INSTANCE_FIELD_PRIVATE(AssetBundleManager*, _assetBundleManager);
 
-    DECLARE_PRIVATE_FIELD(ArrayW<float>, _audioFramesL);
-    DECLARE_PRIVATE_FIELD(ArrayW<float>, _audioFramesR);
-    DECLARE_PRIVATE_FIELD(ArrayW<float>, _samples);
+    DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<float>, _audioFramesL);
+    DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<float>, _audioFramesR);
+    DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<float>, _samples);
 
-    DECLARE_PRIVATE_FIELD(double, _elapsedTime);
-    DECLARE_PRIVATE_FIELD(double, _elapsedTimeMSW);
-    DECLARE_PRIVATE_FIELD(int, _networkTimeMS);
-    DECLARE_PRIVATE_FIELD(double, _networkTimeMSAccumulatedError);
-    DECLARE_PRIVATE_FIELD(double, _fPSTime);
-    DECLARE_PRIVATE_FIELD(int, _fPSCount);
+    DECLARE_INSTANCE_FIELD_PRIVATE(double, _elapsedTime);
+    DECLARE_INSTANCE_FIELD_PRIVATE(double, _elapsedTimeMSW);
+    DECLARE_INSTANCE_FIELD_PRIVATE(int, _networkTimeMS);
+    DECLARE_INSTANCE_FIELD_PRIVATE(double, _networkTimeMSAccumulatedError);
+    DECLARE_INSTANCE_FIELD_PRIVATE(double, _fPSTime);
+    DECLARE_INSTANCE_FIELD_PRIVATE(int, _fPSCount);
 
-    DECLARE_PRIVATE_FIELD(int, _rightChannelTestCounter);
-    DECLARE_PRIVATE_FIELD(bool, _ignoreRightChannel);
-    DECLARE_PRIVATE_FIELD(bool, _initialized);
+    DECLARE_INSTANCE_FIELD_PRIVATE(int, _rightChannelTestCounter);
+    DECLARE_INSTANCE_FIELD_PRIVATE(bool, _ignoreRightChannel);
+    DECLARE_INSTANCE_FIELD_PRIVATE(bool, _initialized);
 
     DECLARE_INSTANCE_METHOD(Sombrero::FastColor, get_customThemeColor0);
     DECLARE_INSTANCE_METHOD(Sombrero::FastColor, get_customThemeColor1);
@@ -55,9 +53,9 @@ ___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP
     DECLARE_INSTANCE_METHOD(ArrayW<float>, get_audioFramesR);
     DECLARE_INSTANCE_METHOD(ArrayW<float>, get_samples);
 
-    DECLARE_OVERRIDE_METHOD(void, Tick, il2cpp_utils::il2cpp_type_check::MetadataGetter<&::Zenject::ITickable::Tick>::get());
-    DECLARE_OVERRIDE_METHOD(void, Initialize, il2cpp_utils::il2cpp_type_check::MetadataGetter<&::Zenject::IInitializable::Initialize>::get());
-    DECLARE_OVERRIDE_METHOD(void, Dispose, il2cpp_utils::il2cpp_type_check::MetadataGetter<&::System::IDisposable::Dispose>::get());
+    DECLARE_OVERRIDE_METHOD_MATCH(void, Tick, &::Zenject::ITickable::Tick);
+    DECLARE_OVERRIDE_METHOD_MATCH(void, Initialize, &::Zenject::IInitializable::Initialize);
+    DECLARE_OVERRIDE_METHOD_MATCH(void, Dispose, &::System::IDisposable::Dispose);
 
     DECLARE_INSTANCE_METHOD(void, UpdateSettings);
     DECLARE_INSTANCE_METHOD(void, UpdateThemeColors);
