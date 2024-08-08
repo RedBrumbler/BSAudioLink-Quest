@@ -15,6 +15,7 @@
 #include "GlobalNamespace/ColorScheme.hpp"
 
 #include "sombrero/shared/FastColor.hpp"
+#include "AssetBundleManager.hpp"
 
 #define INTERFACES {classof(Zenject::ITickable*), classof(Zenject::IInitializable*), classof(::System::IDisposable*)}
 
@@ -27,6 +28,7 @@ ___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP
     DECLARE_PRIVATE_FIELD(UnityEngine::AudioSource*, _audioSource);
     DECLARE_PRIVATE_FIELD(UnityEngine::Material*, _audioMaterial);
     DECLARE_PRIVATE_FIELD(UnityEngine::GameObject*, _testPlane);
+    DECLARE_PRIVATE_FIELD(AssetBundleManager*, _assetBundleManager);
 
     DECLARE_PRIVATE_FIELD(ArrayW<float>, _audioFramesL);
     DECLARE_PRIVATE_FIELD(ArrayW<float>, _audioFramesR);
@@ -65,5 +67,5 @@ ___DECLARE_TYPE_WRAPPER_INHERITANCE(AudioLink, AudioLink, Il2CppTypeEnum::IL2CPP
     DECLARE_INSTANCE_METHOD(void, SetColorScheme, GlobalNamespace::ColorScheme* colorScheme);
 
     public:
-        DECLARE_CTOR(ctor);
+        DECLARE_CTOR(ctor, AssetBundleManager* assetBundleManager);
 )

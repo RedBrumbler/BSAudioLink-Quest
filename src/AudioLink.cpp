@@ -28,9 +28,12 @@ void GetOutputDataHelper(UnityEngine::AudioSource* instance, ArrayW<float>& out,
 
 inline float GetSpatialBlendMix(UnityEngine::AudioSource* self) {
     // this is what the icall in unity does, so this is what we will do
-    // TODO: fix the icall because what we do now is just a no
-    return 0.0f;
+    return 0;
+    using Get_SpatialBlendMix = function_ptr_t<float, UnityEngine::AudioSource*>;
+    static auto get_SpatialBlendMix = reinterpret_cast<Get_SpatialBlendMix>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::GetSpatialBlendMix"));
+    return get_SpatialBlendMix(self);
 
+    // TODO: fix the icall because what we do now is just a no
     if (!self) return 0.0f;
     auto obj = *(long *)(self + 0x90);
     if (!obj) return 0.0f;
@@ -41,9 +44,9 @@ extern Logger& getLogger();
 
 namespace AudioLink {
 
-    void AudioLink::ctor() {
+    void AudioLink::ctor(AssetBundleManager* assetBundleManager) {
         getLogger().info("AudioLink ctor");
-        
+
         _audioFramesL = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
         _audioFramesR = ArrayW<float>(il2cpp_array_size_t(1023 * 4));
         _samples = ArrayW<float>(il2cpp_array_size_t(1023));
@@ -52,6 +55,8 @@ namespace AudioLink {
         _customThemeColor1 = Sombrero::FastColor::cyan();
         _customThemeColor2 = Sombrero::FastColor::pink();
         _customThemeColor3 = Sombrero::FastColor::lightblue();
+
+        _assetBundleManager = assetBundleManager;
 
     }
 
@@ -74,12 +79,11 @@ namespace AudioLink {
 
     void AudioLink::Initialize() {
         getLogger().info("AudioLink Initialize");
-        AssetBundleManager::get_instance()->Load();
-        
-        auto manager = AssetBundleManager::get_instance();
+        _assetBundleManager->Load();
+
         static auto _audioMaterial_info = il2cpp_functions::class_get_field_from_name(klass, "_audioMaterial");
-        il2cpp_functions::field_set_value_object(this, _audioMaterial_info, manager->get_material());
-        auto audioRenderTexture = manager->get_renderTexture();
+        il2cpp_functions::field_set_value_object(this, _audioMaterial_info, _assetBundleManager->get_material());
+        auto audioRenderTexture = _assetBundleManager->get_renderTexture();
 
         getLogger().info("SetGlobalRenderTexture");
         Shader::SetGlobalTexture(ShaderProperties::_audioTexture, audioRenderTexture, Rendering::RenderTextureSubElement::Default);
@@ -96,7 +100,7 @@ namespace AudioLink {
     }
 
     void AudioLink::Dispose() {
-        if (_testPlane && _testPlane->m_CachedPtr.m_value) 
+        if (_testPlane && _testPlane->m_CachedPtr.m_value)
             UnityEngine::Object::DestroyImmediate(_testPlane);
         _testPlane = nullptr;
     }

@@ -34,12 +34,6 @@ Logger& getLogger() {
     return *logger;
 }
 
-MAKE_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &GlobalNamespace::MenuTransitionsHelper::RestartGame, void, GlobalNamespace::MenuTransitionsHelper* self, System::Action_1<Zenject::DiContainer*>* finishCallback) {
-    getLogger().info("MenuTransitionsHelper_RestartGame");
-    AudioLink::AssetBundleManager::get_instance()->RestartGame();
-    MenuTransitionsHelper_RestartGame(self, finishCallback);
-}
-
 MAKE_HOOK_MATCH(SongPreviewPlayer_CrossFadeTo, static_cast<void (GlobalNamespace::SongPreviewPlayer::*)(::UnityEngine::AudioClip*, float, float, float, bool, ::System::Action*)>(&GlobalNamespace::SongPreviewPlayer::CrossfadeTo), void, GlobalNamespace::SongPreviewPlayer* self, ::UnityEngine::AudioClip* audioClip, float musicVolume, float startTime, float duration, bool isDefault, ::System::Action* onFadeOutCallback) {
     getLogger().info("SongPreviewPlayer_CrossFadeTo");
     SongPreviewPlayer_CrossFadeTo(self, audioClip, musicVolume, startTime, duration, isDefault, onFadeOutCallback);
@@ -76,15 +70,15 @@ extern "C" void load() {
     auto zenjector = Lapiz::Zenject::Zenjector::Get();
     zenjector->Install(Lapiz::Zenject::Location::Player, [](::Zenject::DiContainer* container){
         container->BindInterfacesTo<AudioLink::GameProvider*>()->AsSingle()->NonLazy();
-    }); 
+    });
     zenjector->Install(Lapiz::Zenject::Location::App, [](::Zenject::DiContainer* container){
+        container->BindInterfacesAndSelfTo<AudioLink::AssetBundleManager*>()->AsSingle();
         container->BindInterfacesAndSelfTo<AudioLink::AudioLink*>()->AsSingle();
     });
     zenjector->Install(Lapiz::Zenject::Location::Menu, [](::Zenject::DiContainer* container){
         container->Bind<AudioLink::MenuProvider*>()->AsSingle()->NonLazy();
     });
 
-    INSTALL_HOOK(logger, MenuTransitionsHelper_RestartGame);
     INSTALL_HOOK(logger, SongPreviewPlayer_CrossFadeTo);
     INSTALL_HOOK(logger, ColorManagerInstaller_InstallBindings);
 
